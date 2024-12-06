@@ -1,0 +1,458 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "version": "1.0.7",
+    "title": "Swagger Prime food",
+    "contact": { "email": "abdelrahmanmontaser12345@gmail.com" },
+    "license": {
+      "name": "Apache 2.0",
+      "url": "http://www.apache.org/licenses/LICENSE-2.0.html"
+    }
+  },
+  "host": "localhost:3000",
+  "basePath": "/v1",
+  "tags": [
+    {
+      "name": "restaurant"
+    },
+    { "name": "vendor" }
+  ],
+  "schemes": ["http", "https"],
+  "paths": {
+    "/restaurants": {
+      "get": {
+        "tags": ["restaurant"],
+        "summary": "Finds all nearby restaurants",
+        "operationId": "find restaurants by location",
+        "produces": ["application/json" ],
+        "parameters": [
+          {
+            "name": "longitude",
+            "in": "query",
+            "description": "location longitude",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "latitude",
+            "in": "query",
+            "description": "location latitude",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "limit filter",
+            "required": false,
+            "type": "integer"
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "description": "page filter",
+            "required": false,
+            "type": "integer"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": { "$ref": "#/definitions/nearby restaurants" }
+          },
+          "400": { "description": "Invalid status value" }
+        }
+      }
+    },
+    "/restaurants/{_id}": {
+      "get": {
+        "tags": ["restaurant"],
+        "summary": "Finds restaurant by id grouped by categories",
+        "operationId": "find restaurant by _id",
+        "produces": ["application/json" ],
+        "parameters": [
+          {
+            "name": "_id",
+            "in": "path",
+            "description": "restaurant id",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "longitude",
+            "in": "query",
+            "description": "location longitude",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "latitude",
+            "in": "query",
+            "description": "location latitude",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": { "$ref": "#/definitions/restaurant" }
+          },
+          "400": { "description": "Invalid status value" }
+        }
+      }
+    },
+    "/restaurants/{_id}/compare": {
+      "get": {
+        "tags": ["restaurant"],
+        "summary": "list item price at different vendors",
+        "operationId": "compare_prices",
+        "produces": ["application/json" ],
+        "parameters": [
+          {
+            "name": "_id",
+            "in": "path",
+            "description": "restaurant id",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "longitude",
+            "in": "query",
+            "description": "location longitude",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "latitude",
+            "in": "query",
+            "description": "location latitude",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": { "$ref": "#/definitions/compare prices" }
+          },
+          "400": { "description": "Invalid status value" }
+        }
+      }
+    },
+    "/restaurants/category": {
+      "get": {
+        "tags": ["restaurant"],
+        "summary": "get restaurant based on its category",
+        "operationId": "getByCategory",
+        "produces": ["application/json" ],
+        "parameters": [
+          {
+            "name": "category_name",
+            "in": "query",
+            "description": "menu category",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "longitude",
+            "in": "query",
+            "description": "location longitude",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "latitude",
+            "in": "query",
+            "description": "location latitude",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": { "$ref": "#/definitions/restaurantByCategory" }
+          },
+          "400": { "description": "Invalid status value" }
+        }
+      }
+    },
+    "/vendors/upload":{
+        "post": {
+            "tags": ["vendor"],
+            "summary": "upload restaurants data based on vendor",
+            "operationId": "compare_prices",
+            "produces": ["application/json" ],
+            "parameters":[
+                {
+                    "name": "restaurants",
+                    "required":true,
+                    "type": "file",
+                    "in": "form-data",
+                    "description": "json file contains resturents and prices based on vendor file name should start with venodr name followed by underscore (ex DELIVEROO_MENU_DATA_AE.json)"
+                }
+            ],
+            "responses": {
+          "200": {
+            "description": "successful operation"
+          }
+        }
+        }
+    }
+  },
+  "securityDefinitions": {
+    "api_key": { "type": "apiKey", "name": "api_key", "in": "header" },
+    "petstore_auth": {
+      "type": "oauth2",
+      "authorizationUrl": "https://petstore.swagger.io/oauth/authorize",
+      "flow": "implicit",
+      "scopes": {
+        "read:pets": "read your pets",
+        "write:pets": "modify pets in your account"
+      }
+    }
+  },
+  "definitions": {
+    "nearby restaurants": {
+      "type": "object",
+      "properties": {
+        "data": {
+          "type": "object",
+          "required": ["restaurants", "menuCategory"],
+          "properties": {
+            "restaurants": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "_id": {
+                    "type": "string",
+                    "default": "6740bfc4a9450a626891f828"
+                  },
+                  "location": {
+                    "type": "object",
+                    "properties": {
+                      "coordinates": {
+                        "type": "array",
+                        "default": [55.4152117, 25.1287359]
+                      }
+                    }
+                  },
+                  "name": {
+                    "type": "string",
+                    "default": "project pie pizza - academic city"
+                  },
+                  "city": { "type": "string", "default": "dubai" },
+                  "country": { "type": "string", "default": "AE" },
+                  "currency": { "type": "string", "default": "AED" },
+                  "fullAddress": {
+                    "type": "string",
+                    "default": "Academic City, ENOC 1097..."
+                  },
+                  "streetAddress": {
+                    "type": "string",
+                    "default": "Academic City, ENOC 1097..."
+                  },
+                  "postalCode": { "type": "string" },
+                  "vendors": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "name": { "type": "string", "default": "deliveroo" },
+                        "url": {
+                          "type": "string",
+                          "default": "https://deliveroo.ae/menu/dubai/academic-city/project-pie-enoc-1097-academic-city"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "menuCategory": {
+              "type": "array",
+              "items": { "type": "string", "default": "Chicken Sandwiches" }
+            },
+            "offers": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "_id": {
+                    "type": "string",
+                    "default": "6740bfc4a9450a626891f828"
+                  },
+                  "offer": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "percentage_off_title": {
+                          "type": "string",
+                          "default": "Free delivery"
+                        },
+                        "percentage_off_message": {
+                          "type": "string",
+                          "default": "Spend AED 50 to get free delivery"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "xml": { "name": "nearbyRestaurants" }
+    },
+    "restaurant": {
+      "type": "object",
+      "properties": {
+        "data": {
+          "type": "object",
+          "required": ["categories"],
+          "properties": {
+            "categories": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "category": {
+                    "type": "string",
+                    "default": "Medium Pizza Almond Crust"
+                  },
+                  "items": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "price": { "type": "string", "default": "AED 55" },
+                        "item_name": {
+                          "type": "string",
+                          "default": "All Meat Almond Crust"
+                        },
+                        "item_image_url": {
+                          "type": "string",
+                          "default": "https://rs-menus-api.roocdn.com/images/de7209f7-aed4-418c-97a7-7172a9d03a04/image.jpeg"
+                        },
+                        "item_description": {
+                          "type": "string",
+                          "default": "Traditional pizza sauce, smoked beef bacon, pepperoni and sausage."
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "offers": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "percentage_off_title": {
+                    "type": "string",
+                    "default": "Free delivery"
+                  },
+                  "percentage_off_message": {
+                    "type": "string",
+                    "default": "Spend AED 50 to get free delivery"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "compare prices": {
+      "type": "object",
+      "properties": {
+        "data": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["name", "url", "price"],
+            "properties": {
+              "name": { "type": "string", "default": "deliveroo" },
+              "url": {
+                "type": "string",
+                "default": "https://deliveroo.ae/menu/dubai/academic-city/project-pie-enoc-1097-academic-city"
+              },
+              "price": { "type": "string", "default": "AED 115" },
+              "modifiers": {
+                "type": "object",
+                "default": {
+                  "Select First PP Pizza": [
+                    {
+                      "PP All Meat": "AED 0"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "restaurantByCategory": {
+      "type": "object",
+      "properties": {
+        "data": {
+            "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "_id": {
+                    "type": "string",
+                    "default": "6740bfc4a9450a626891f828"
+                  },
+                  "location": {
+                    "type": "object",
+                    "properties": {
+                      "coordinates": {
+                        "type": "array",
+                        "default": [55.4152117, 25.1287359]
+                      }
+                    }
+                  },
+                  "name": {
+                    "type": "string",
+                    "default": "project pie pizza - academic city"
+                  },
+                  "city": { "type": "string", "default": "dubai" },
+                  "country": { "type": "string", "default": "AE" },
+                  "currency": { "type": "string", "default": "AED" },
+                  "fullAddress": {
+                    "type": "string",
+                    "default": "Academic City, ENOC 1097..."
+                  },
+                  "streetAddress": {
+                    "type": "string",
+                    "default": "Academic City, ENOC 1097..."
+                  },
+                  "postalCode": { "type": "string" },
+                  "vendors": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "name": { "type": "string", "default": "deliveroo" },
+                        "url": {
+                          "type": "string",
+                          "default": "https://deliveroo.ae/menu/dubai/academic-city/project-pie-enoc-1097-academic-city"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+          }
+        }
+      }
+    }
+  }
+
