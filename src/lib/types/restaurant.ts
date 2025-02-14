@@ -1,14 +1,20 @@
 export type restaurant ={
     URL: string;
-    RestaurantName: string;
+    Location: string;
+    'Restaurant Name': string;
     Country: string;
-    FullAddress: string;
-    Street_address: string;
+    Address: string;
+    'Street Address': string;
     City: string;
-    PostalCode: string;
+    'Postal Code': string;
     Latitude: string;
     Longitude: string;
     Offer?: string;
-    menu: [];
+    Menu: [];
     Currency: string;
+    'Delivery Time': string;
+    'Restaurant Rating': string;
+    'Restaurant Reviews': string;
+    'Restaurant Image': string;
+    'Brand Availability': string;
 }

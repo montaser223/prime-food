@@ -3,6 +3,7 @@ import { Config } from "../../configuration";
 import { DataBase } from "../db/DatabaseDriver";
 import { Logger } from "../helpers/logger";
 import { menuCategoryPath, offer, selectedDataFilter } from "../../consts";
+import { query } from "express";
 
 const DB_URL = process.env.DB_URL!
 
@@ -16,14 +17,14 @@ export class RestaurantService {
     }
 
     public getNearbyRestaurants(filters:any): Promise<any>[]{
-        const { query: {longitude, latitude}, params} = filters;
-        const [skip, limit] = this.paginationFilters(params)
+        const { query: {longitude, latitude}} = filters;
+        const [skip, limit] = this.paginationFilters(filters.query)
         const location = this.geoLocationFilter(longitude, latitude);
         const query = { location }
         return [
             this.getResturents(query, skip, limit),
             this.getCategories(query),
-            this.getOffers({...query,  offer: {$exists: true, $ne: {}}}, skip, limit)
+            this.getOffers({...query,  offer: {$exists: true, $nin: [{}, null]}}, skip, limit)
         ]
     }
     
@@ -39,7 +40,7 @@ export class RestaurantService {
             { $group: {
                 _id: "$vendor.menu.MenuCategory",
               category: { $first: "$vendor.menu.MenuCategory" },
-                items: { $push: "$vendor.menu.items" }
+                items: { $push: "$vendor.menu.Items" }
             } },
             { $unwind: "$items" },
             { $project: { _id: 0 }  },
@@ -55,27 +56,28 @@ export class RestaurantService {
 
     public comparePrices(filters: any): Promise<any>{
         const { query: {longitude, latitude}} = filters;
+        
         const aggregates: PipelineStage[] = [
             { $match: {_id: new Types.ObjectId(filters.params.id)}},
             { $unwind: '$vendors'},
             { $unwind: "$vendors.menu" },
-            { $unwind: "$vendors.menu.items" },
-            { $match: {'vendors.menu.items.item_name': filters.query.item_name}},
-            {$project: {_id: 0,price: "$vendors.menu.items.price", modifiers: "$vendors.menu.items.modifiers", name: "$vendors.name", url: "$vendors.url"}}
+            { $unwind: "$vendors.menu.Items" },
+            { $match: {'vendors.menu.Items.item_name': filters.query.item_name}},
+            {$project: {_id: 0,price: "$vendors.menu.Items.price", modifiers: "$vendors.menu.Items.modifiers", name: "$vendors.name", url: "$vendors.url"}}
         ];
         const location = {near: { type: 'Point', coordinates: [+longitude!, +latitude!] }, distanceField: "location"};
         return this.db.aggregate(aggregates,location)
     }
 
     public getResturentByCategory(filters:any): Promise<any>{
-        const [skip, limit] = this.paginationFilters(filters.params);
-        const { query: {longitude, latitude}} = filters;
+        const [skip, limit] = this.paginationFilters(filters.query);
+        const { query: {longitude, latitude, name}} = filters;
         const location = this.geoLocationFilter(longitude, latitude)
         const query = {
             location,
-            "vendors.menu.MenuCategory": filters.query.category_name
+            $or: [{"vendors.menu.MenuCategory": filters.query.category_name}, {name}]
         }
-        return this.db.find(query).skip(skip).limit(limit).select(selectedDataFilter);
+        return this.db.find({query, limit, select: selectedDataFilter, page:skip})
     }
 
     private async getResturentItemsByCategory(aggregates:any, location: any){
@@ -86,26 +88,36 @@ export class RestaurantService {
         return this.db.findOne(filters);
     }
 
-    private async getResturents(filters:any, skip:number, limit:number) {
-        return this.db.find(filters).skip(skip).limit(limit).select(selectedDataFilter)
+    private async getResturents(filters:any, skip:number, limit:number) {        
+        return this.db.find({query: filters,limit, select: selectedDataFilter, page: skip})
     }
 
     private async getCategories(filters:any) {
-        return this.db.find(filters).distinct(menuCategoryPath);
+        return this.db.distinct(menuCategoryPath, filters);
     }
 
     private async getOffers(filters:any, skip:number, limit:number) {
-        return this.db.find(filters).skip(skip).limit(limit).select(offer)
+        return this.db.find({query: filters, limit, page: skip, select: offer});
     }
 
     private paginationFilters(params:any): [number, number]{
-        const skip = (params.limit * (params.page - 1)) || 0;
+        const skip = params.page || 1;
         const limit = params.limit || 10;
-
         return [skip, limit]
     }
 
     private geoLocationFilter(lng:number,lat: number){
+        return {
+            $geoWithin: {
+                $centerSphere: [
+                    [lng, lat],
+                     5 / 6378.1,
+                ],
+              }
+        }
+    }
+
+    private getGeoLocationFilter(lng:number,lat: number){
         return {$near: {
             $geometry: { type: "Point",  coordinates: [ lng, lat ] },
             $maxDistance: 5000

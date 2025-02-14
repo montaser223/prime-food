@@ -12,7 +12,7 @@ export const  getNearbyRestaurants = async (req: Request, res: Response, next: N
     try {
         const filters = {query: req.query, params: req.params};
         const [restaurants, categories, offers] = await Promise.all(service.getNearbyRestaurants(filters))
-        res.json({data: {restaurants,categories, offers}});
+        res.json({data: {restaurants, categories, offers}});
     } catch (error) {
         next(error);
     }
@@ -44,7 +44,8 @@ export const getResturentByCategory = async (req: Request, res: Response, next:N
     try {
         const filters = {query: req.query, params: req.params};
         const restaurants = await service.getResturentByCategory(filters);
-        if(!restaurants.length) throw new CustomError(errorCodes.notFound);
+        
+        if(!restaurants.docs.length) throw new CustomError(errorCodes.notFound);
         res.json({data: restaurants});
     } catch (error) {
         next(error);

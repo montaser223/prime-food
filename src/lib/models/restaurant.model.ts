@@ -1,13 +1,13 @@
-import { NextFunction } from "express";
-import { model, Schema } from "mongoose";
+import mongoose, { model, Schema } from "mongoose";
+import { mongoosePagination, Pagination } from "mongoose-paginate-ts";
 
 const restaurantSchema = new Schema({
   name: {
     type: String,
-    unique: true,
-    lowercase: true,
+    // unique: true,
+    // lowercase: true,
     trim: true,
-    index: true,
+    // index: true,
   },
   country: String,
   fullAddress: String,
@@ -28,6 +28,11 @@ const restaurantSchema = new Schema({
   },
   currency: String,
   offer: Object,
+  deliveryTime: String,
+  restaurantImage: String,
+  reviews: String,
+  rate: String,
+  // [:string]: String,
   vendors: [
     {
       name: String,
@@ -35,23 +40,21 @@ const restaurantSchema = new Schema({
       menu: [],
     },
   ],
+}, {
+  strict: false
 });
-
-interface IRestaurant extends Document {
-    name: string
-}
-
-// restaurantSchema.post<IRestaurant>("find",function(next: NextFunction){
-//     console.log(this);
-    
-//     // this.name.replace(/(\w)(\w*)/g,
-//     //     (_,g1,g2) => g1.toUpperCase() + g2.toLowerCase());
-
-//     next();
-// });
-
-// restaurantSchema.index()
 
 restaurantSchema.index({location: "2dsphere"});
 
-export const Restaurant = model("restaurants", restaurantSchema);
+restaurantSchema.plugin(mongoosePagination);
+
+type IRestaurant = mongoose.Document & {
+  location: {
+    type: String,
+    coordinates:  [Number, Number]
+  },
+  offer: Object
+}
+
+
+export const Restaurant: Pagination<IRestaurant> = model<IRestaurant, Pagination<IRestaurant>>("restaurants", restaurantSchema);

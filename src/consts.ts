@@ -2,7 +2,7 @@ export const selectedDataFilter = '-vendors.menu -vendors._id -location.type -__
 
 export const menuCategoryPath = 'vendors.menu.MenuCategory';
 
-export const offer = 'offer';
+export const offer = 'offer name';
 
 export const errorCodes = {
     unauthorized: {

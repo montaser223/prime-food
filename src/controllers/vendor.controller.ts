@@ -22,7 +22,8 @@ export const uploadRestaurantsInfo = async (
     logger.debug(
       `[vendor][uploadRestaurantsInfo][${vendorName}] start uploading restaurants info`
     );
-    await service.handleRestaurants(req.file?.buffer!, vendorName);
+    const restaurants = JSON.parse(req.file?.buffer.toString() || '[]');
+    await service.handleRestaurants(restaurants, vendorName);
     res.end();
     logger.info(`[vendor][uploadRestaurantsInfo][${vendorName}] restaurants uploaded successfully`);
   } catch (error) {

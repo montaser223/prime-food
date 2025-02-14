@@ -7,8 +7,6 @@ import { ComparePricesDto } from "../lib/dtos/comparePrices.dto";
 
 export const restaurantsRouter = Router();
 
-// restaurantsController.bind(RestaurantsController)
-
 restaurantsRouter.get("/", validateRequest(BaseDto), getNearbyRestaurants)
 restaurantsRouter.get("/category", validateRequest(RestaurantByCatDto),getResturentByCategory)
 restaurantsRouter.get("/:id", validateRequest(BaseDto), getResturentById)
